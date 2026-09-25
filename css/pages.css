@@ -1,0 +1,470 @@
+/* ==========================================================
+   pages.css — ajustes específicos por página
+   ========================================================== */
+
+/* ---------- Hero (Home) ----------
+   Hero compacto y SIN foto de fondo. Una sola imagen estirada a todo el
+   viewport se ve blanda (se amplía muy por encima de su resolución útil),
+   y además empujaba el catálogo fuera de la primera pantalla. El fondo es
+   degradado puro y las únicas fotos son miniaturas de producto en tamaño
+   contenido, que sí se ven nítidas. */
+.hero{
+  position: relative;
+  background: var(--grad-deep);
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Profundidad con gradientes en lugar de imágenes: no pesa ni se pixela. */
+.hero::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(70% 90% at 78% 10%, rgba(168,127,209,.32), transparent 68%),
+    radial-gradient(55% 80% at 6% 94%, rgba(217,163,184,.18), transparent 70%);
+  pointer-events: none;
+}
+/* El hero flota bajo el header transparente: se compensa su altura y se
+   le da aire, ya que la sección no reserva una pantalla completa. */
+body:has(.header--overlay) .hero .container{
+  padding-top: calc(var(--header-h) + var(--s-6));
+  padding-bottom: var(--s-7);
+}
+.hero__inner{
+  display: grid;
+  gap: var(--s-6);
+  align-items: center;
+}
+@media (min-width: 900px){
+  .hero__inner{
+    grid-template-columns: minmax(0, 1fr) minmax(0, .88fr);
+    gap: var(--s-7);
+  }
+}
+.hero__content{
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  /* El límite va en rem, no en ch: 'ch' se resuelve con la tipografía de
+     ESTE elemento (Inter 1rem), no con la del título, y dejaba la columna
+     en ~180px recortando título y botones. */
+  max-width: min(100%, 34rem);
+}
+.hero__eyebrow{
+  color: var(--accent-light);
+}
+.hero__eyebrow::before{ background: var(--accent-light); }
+.hero__title{
+  font-size: var(--fs-hero);
+  color: #fff;
+  line-height: 1.04;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+  text-shadow: 0 2px 30px rgba(28,18,38,.4);
+}
+/* La última palabra del título va en cursiva para dar aire editorial. */
+.hero__title em{
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent-light);
+}
+.hero__lead{
+  margin-top: var(--s-5);
+  font-size: var(--fs-lg);
+  color: rgba(255,255,255,.88);
+  max-width: 44ch;
+  text-shadow: 0 1px 12px rgba(28,18,38,.35);
+}
+.hero__ctas{
+  margin-top: var(--s-6);
+}
+.hero__ctas .btn--text{ color: #fff; }
+.hero__ctas .btn--text:hover{ color: var(--accent-light); }
+
+@media (min-width: 768px){
+  .hero__lead{ max-width: 44ch; }
+}
+
+/* ---------- Miniaturas de producto del hero ----------
+   Se muestran a ~150-260px de ancho tomando el archivo de 600px: la foto
+   queda sobrada de resolución incluso en pantallas retina. */
+.hero__picks{
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+}
+.hero-pick{
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: var(--sh-2);
+}
+.hero-pick img{
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out-expo);
+}
+@media (hover: hover) and (pointer: fine){
+  .hero-pick:hover img{ transform: scale(1.06); }
+}
+/* Escalonado editorial en escritorio. Se usa margin y no transform para
+   que los reveals de GSAP no lo pisen al limpiar sus propiedades. */
+@media (min-width: 900px){
+  .hero__picks{ gap: var(--s-4); }
+  .hero__picks > :nth-child(2){ margin-top: var(--s-7); }
+  .hero__picks > :nth-child(3){ margin-top: var(--s-5); }
+}
+
+
+/* ---------- Banda de propuesta de valor ---------- */
+.value-band{
+  background: var(--primary-soft);
+  padding-block: var(--s-8);
+  position: relative;
+  overflow: hidden;
+}
+.value-band__inner{
+  display: grid;
+  gap: var(--s-6);
+  align-items: center;
+}
+@media (min-width: 768px){
+  .value-band__inner{ grid-template-columns: 1fr 1fr; gap: var(--s-8); }
+}
+/* Banda solo de texto: se usa cuando no hay una foto que aporte algo.
+   Evita estirar una imagen a media pantalla. */
+.value-band__inner--text{
+  max-width: 46rem;
+  margin-inline: auto;
+  text-align: center;
+}
+@media (min-width: 768px){
+  .value-band__inner--text{ grid-template-columns: 1fr; }
+}
+.value-band__quote{
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  color: var(--primary-dark);
+  line-height: 1.28;
+  letter-spacing: -.02em;
+  font-optical-sizing: auto;
+}
+.value-band__attrib{
+  margin-top: var(--s-4);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ---------- Teaser (Home) ---------- */
+.about-teaser__inner{
+  display: grid;
+  gap: var(--s-6);
+  align-items: center;
+}
+@media (min-width: 768px){
+  .about-teaser__inner{ grid-template-columns: 1fr 1fr; gap: var(--s-8); }
+}
+.about-teaser__media{
+  position: relative;
+  aspect-ratio: 4/5;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-2);
+}
+@media (min-width: 768px){ .about-teaser__media{ aspect-ratio: 1/1; } }
+.about-teaser__media img{ width: 100%; height: 100%; object-fit: cover; }
+
+/* Marco decorativo desplazado detrás de la foto. */
+.about-teaser__frame{
+  position: relative;
+}
+.about-teaser__frame::before{
+  content: '';
+  position: absolute;
+  inset: var(--s-5) calc(var(--s-5) * -1) calc(var(--s-5) * -1) var(--s-5);
+  border: 1px solid var(--primary-light);
+  border-radius: var(--r-lg);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ---------- Contacto rápido (Home) ---------- */
+.quick-contact{
+  background: var(--surface-warm);
+}
+.quick-contact__grid{
+  display: grid;
+  gap: var(--s-4);
+}
+@media (min-width: 768px){
+  .quick-contact__grid{ grid-template-columns: 1fr 1fr 1fr; align-items: stretch; gap: var(--s-5); }
+}
+.quick-contact__item{
+  display: flex;
+  gap: var(--s-4);
+  background: var(--surface);
+  border: 1px solid var(--border-warm);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  box-shadow: var(--sh-1);
+}
+.quick-contact__item--cta{
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+.quick-contact__item .icon{
+  width: 24px; height: 24px;
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.quick-contact__label{
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.quick-contact__value{
+  font-size: var(--fs-base);
+  font-weight: 500;
+  margin-top: var(--s-1);
+}
+
+/* ---------- Proceso en 3 pasos ----------
+   El contenedor es relativo para alojar .process-line (ver motion.css),
+   la línea que se dibuja con ScrollTrigger entre los tres pasos. */
+.process{
+  position: relative;
+  display: grid;
+  gap: var(--s-6);
+}
+@media (min-width: 768px){
+  .process{ grid-template-columns: repeat(3, 1fr); gap: var(--s-6); }
+}
+.process-step{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+/* El número queda fuera de la tarjeta, a la altura de la línea que une los
+   tres pasos. Antes el paso entero llevaba fondo blanco: tapaba la línea
+   (solo se veía a trozos en los huecos) y el texto quedaba pegado al borde
+   porque no había padding. */
+.process-step__num{
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 46px; height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  border: 1px solid var(--primary-light);
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  color: var(--primary-dark);
+  font-optical-sizing: auto;
+}
+.process-step__card{
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s-5);
+  box-shadow: var(--sh-1);
+}
+.process-step__title{
+  font-size: var(--fs-h3);
+}
+.process-step__text{
+  margin-top: var(--s-2);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* ---------- Contacto (página) ---------- */
+.contact-grid{
+  display: grid;
+  gap: var(--s-7);
+}
+@media (min-width: 1024px){
+  .contact-grid{ grid-template-columns: 1fr 1fr; }
+}
+.contact-block{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  /* Misma sombra que las tarjetas de producto, para que las dos páginas
+     usen la misma caja. */
+  box-shadow: var(--sh-1);
+  padding: var(--s-5);
+}
+.contact-block + .contact-block{ margin-top: var(--s-4); }
+.contact-block__title{
+  font-size: var(--fs-h3);
+  margin-bottom: var(--s-4);
+}
+.contact-address{
+  margin-bottom: var(--s-4);
+  color: var(--text-muted);
+}
+.hours-table{
+  width: 100%;
+  border-collapse: collapse;
+}
+.hours-table td{
+  padding-block: var(--s-2);
+  font-size: var(--fs-sm);
+  border-bottom: 1px solid var(--border);
+}
+.hours-table td:first-child{ color: var(--text-muted); }
+.hours-table td:last-child{ text-align: right; font-weight: 600; }
+.hours-table tr:last-child td{ border-bottom: none; }
+
+/* Enlace a Google Maps. No lleva imagen: la que había era la de muestra y
+   una captura de mapa pesa y se ve borrosa al estirarla. El fondo es
+   degradado, igual que las bandas del sitio. */
+.map-link{
+  display: flex;
+  align-items: flex-end;
+  min-height: 150px;
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  position: relative;
+  background:
+    radial-gradient(70% 90% at 22% 12%, rgba(168,127,209,.20), transparent 70%),
+    radial-gradient(60% 80% at 85% 90%, rgba(217,163,184,.18), transparent 72%),
+    var(--surface-warm);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+@media (hover: hover) and (pointer: fine){
+  .map-link:hover{ border-color: var(--primary-light); box-shadow: var(--sh-1); }
+}
+.map-link img{ width: 100%; height: auto; display: block; }
+.map-link__label{
+  position: relative;
+  background: rgba(255,255,255,.95);
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  box-shadow: var(--sh-1);
+}
+
+/* ---------- Banda de entrada de página (catálogo y contacto) ----------
+   Mismo recurso que el hero del Home: degradado y gradientes radiales en
+   lugar de una foto grande, que al ampliarse pierde definición. */
+.page-head{
+  position: relative;
+  background: var(--grad-deep);
+  color: var(--text-on-dark);
+  padding-block: var(--s-7);
+  overflow: hidden;
+  isolation: isolate;
+}
+.page-head::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60% 90% at 82% 8%, rgba(168,127,209,.30), transparent 70%),
+    radial-gradient(45% 80% at 4% 96%, rgba(217,163,184,.16), transparent 72%);
+  pointer-events: none;
+}
+.page-head__eyebrow{ color: var(--accent-light); }
+.page-head__eyebrow::before{ background: var(--accent-light); }
+.page-head__title{
+  font-size: var(--fs-display);
+  color: #fff;
+  letter-spacing: -.03em;
+}
+.page-head__lead{
+  margin-top: var(--s-3);
+  color: rgba(255,255,255,.86);
+  max-width: 52ch;
+}
+/* Solo el catálogo lleva buscador dentro de la banda. */
+.page-head__search{
+  margin-top: var(--s-5);
+  max-width: 32rem;
+}
+/* Contacto lleva su acción principal dentro de la banda. */
+.page-head__cta{
+  margin-top: var(--s-5);
+}
+
+/* ---------- 404 ---------- */
+.error-page{
+  min-height: 60dvh;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.error-page__inner{ margin-inline: auto; }
+.error-page__eyebrow{ color: var(--primary-light); }
+.error-page__title{ font-size: var(--fs-display); margin-top: var(--s-2); }
+.error-page__text{ margin-top: var(--s-3); color: var(--text-muted); }
+.error-page__ctas{ margin-top: var(--s-6); justify-content: center; }
+
+/* ==========================================================
+   Utilidades de página (sustituyen estilos inline)
+   ========================================================== */
+
+.page-head{
+  padding-top: var(--s-8);
+  padding-bottom: var(--s-2);
+}
+.page-title{
+  font-size: var(--fs-display);
+  color: var(--text);
+}
+.page-intro{
+  margin-top: var(--s-4);
+  color: var(--text-muted);
+  font-size: var(--fs-lg);
+  max-width: 62ch;
+}
+
+.text-center{ text-align: center; }
+.cta-group--center{ justify-content: center; }
+
+/* Enlace dentro de un párrafo. */
+.link-inline{
+  color: var(--primary-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Los iconos sociales viven en el footer oscuro, pero también se reutilizan
+   en la página de contacto sobre fondo claro: ahí necesitan su propio borde. */
+.contact-block .footer__social a{
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.contact-block .footer__social a:hover{
+  background: var(--primary-tint);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}

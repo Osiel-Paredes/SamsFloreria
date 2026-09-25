@@ -1,0 +1,1045 @@
+/* ==========================================================
+   components.css — botones, tarjetas, chips, buscador,
+   modal de producto, badges, toast, estados vacíos, carrusel
+   ========================================================== */
+
+/* ---------- Botones ----------
+   Estructura: el .btn es el contenedor posicionado; el brillo (sheen) vive
+   en ::after y lo cruza GSAP en hover. El contenido se envuelve en
+   .btn__label desde motion.js para poder desplazarlo con el efecto
+   magnético sin mover la caja (y sin romper el layout). */
+.btn{
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: 50px;
+  padding-inline: var(--s-5);
+  border-radius: var(--r-full);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  letter-spacing: .005em;
+  white-space: nowrap;
+  transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+              color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+              opacity var(--dur-fast) var(--ease);
+}
+.btn .icon{ width: 20px; height: 20px; }
+/* Fallback de :active solo cuando GSAP no tomó el control del botón. */
+.btn:not(.is-magnetic):active{ transform: scale(.98); }
+
+/* Capa de brillo diagonal que cruza el botón en hover (CSS puro:
+   animar un pseudo-elemento con GSAP requeriría plugins obsoletos). */
+.btn--primary::after,
+.btn--dark::after{
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  background: var(--grad-sheen);
+  transform: translateX(-120%);
+  transition: transform var(--dur-slow) var(--ease);
+  pointer-events: none;
+}
+.btn--primary:hover::after,
+.btn--dark:hover::after{ transform: translateX(120%); }
+
+/* motion.js envuelve el contenido del botón en .btn__label para poder
+   desplazarlo con el efecto magnético sin alterar la caja.
+   `gap: inherit` conserva la separación icono/texto del .btn padre. */
+.btn__label{
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  pointer-events: none;
+}
+
+.btn--primary{
+  background-image: var(--grad-primary);
+  background-color: var(--primary);
+  color: var(--text-on-primary);
+  box-shadow: var(--sh-primary);
+}
+.btn--primary:hover{
+  background-image: var(--grad-primary-hover);
+  box-shadow: var(--sh-primary-lg);
+}
+
+/* Botón oscuro para usar sobre fondos claros cálidos. */
+.btn--dark{
+  background: var(--grad-deep);
+  color: var(--text-on-dark);
+  box-shadow: var(--sh-2);
+}
+.btn--dark:hover{ box-shadow: var(--sh-3); }
+
+/* Botón grande y elegante para el hero. */
+.btn--hero{
+  height: 60px;
+  padding-inline: var(--s-6);
+  font-size: var(--fs-lg);
+  gap: var(--s-3);
+  border: 1px solid rgba(255,255,255,.22);
+}
+
+/* Flecha que se desplaza en hover. Queda como fallback CSS: si GSAP
+   está activo, motion.js la anima con más detalle. */
+.btn .icon--arrow{ transition: transform var(--dur) var(--ease-spring); }
+.btn:hover .icon--arrow{ transform: translateX(5px); }
+
+.btn--outline{
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+}
+.btn--outline:hover{
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  background: var(--primary-tint);
+}
+
+/* Botón fantasma para usar sobre imagen / fondo oscuro. */
+.btn--ghost{
+  background: rgba(255,255,255,.10);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.34);
+  backdrop-filter: blur(10px);
+}
+.btn--ghost:hover{ background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.6); }
+
+/* Enlace-botón con subrayado que se dibuja en hover. */
+.btn--text{
+  position: relative;
+  overflow: visible;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  color: var(--primary-dark);
+  font-weight: 600;
+  box-shadow: none;
+  background: none;
+}
+.btn--text::before{
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur) var(--ease-out-expo);
+}
+.btn--text:hover{ color: var(--primary); }
+.btn--text:hover::before{ transform: scaleX(1); }
+
+.btn--block{ width: 100%; }
+.btn--sm{ height: 42px; padding-inline: var(--s-4); font-size: var(--fs-sm); }
+
+@media (min-width: 480px){
+  .btn--block{ width: auto; min-width: 220px; }
+}
+
+/* ---------- Grupo de CTAs ---------- */
+.cta-group{
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  align-items: stretch;
+}
+@media (min-width: 480px){
+  /* wrap: si no caben en una línea, bajan; sin esto se encogen y .btn
+     (overflow:hidden + nowrap) recortaría la etiqueta. */
+  .cta-group{ flex-direction: row; align-items: center; flex-wrap: wrap; }
+}
+
+/* ---------- Huecos de reserva (skeleton) ----------
+   Las filas del Home las rellena js/home.js, así que en el primer pintado
+   están vacías. Sin reservar su altura el documento crecía ~2000px al
+   cargar: el hero se estiraba, empujaba el contenido hacia abajo y al
+   recargar la página el scroll aterrizaba en el sitio equivocado.
+   Son cajas sin color: nunca se ven, solo ocupan el espacio exacto de la
+   tarjeta que va a sustituirlas. */
+.skel{
+  display: block;
+  aspect-ratio: 4 / 5;
+}
+/* Suma el alto del cuerpo de la tarjeta de producto. En teléfono:
+   padding 12 + nombre a dos líneas 40 + precio 24 + padding 12. Desde
+   768px los tamaños del texto suben y también este valor. Si cambias el
+   tamaño del nombre o del precio en .card, ajusta esto. */
+.skel--card{
+  margin-bottom: 5.5rem;
+}
+@media (min-width: 768px){
+  .skel--card{ margin-bottom: 6.9rem; }
+}
+.skel--cat{ aspect-ratio: 1 / 1; }
+
+/* ---------- Tarjeta de producto ----------
+   Una sola caja: foto arriba, y debajo nombre, precio y botón de pedido.
+   El hover lo maneja motion.js con un timeline pausado (elevación +
+   zoom + precio). Lo de aquí es el fallback y el estado base. */
+.card{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  /* La foto llega a los bordes de la tarjeta y la recorta el contenedor. */
+  overflow: hidden;
+  box-shadow: var(--sh-1);
+  transition: box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+/* En el catálogo la tarjeta es un <article> y esto es el enlace al detalle;
+   en el Home la propia tarjeta es el enlace y esta clase no aparece. */
+.card__link{
+  display: block;
+  color: inherit;
+}
+.card__media{
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--surface-muted);
+}
+.card__media img{
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out-expo);
+}
+/* Velo inferior que aparece en hover, para que el "Ver detalle" se lea. */
+.card__media::after{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(28,18,38,.5), transparent 55%);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+  pointer-events: none;
+}
+.card__hint{
+  position: absolute;
+  left: var(--s-3);
+  bottom: var(--s-3);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  pointer-events: none;
+}
+/* Píldora "Temporada" translúcida sobre la foto (esquina superior izq.). */
+.card__tag{
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-3);
+  border-radius: var(--r-full);
+  background: rgba(122,78,171,.82);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 10px rgba(28,18,38,.22);
+}
+.card__tag .icon{ width: 14px; height: 14px; }
+@media (hover: hover) and (pointer: fine){
+  .card:hover{ box-shadow: var(--sh-3); border-color: var(--border-strong); }
+  .card:hover .card__media img{ transform: scale(1.06); }
+  .card:hover .card__media::after{ opacity: 1; }
+  .card:hover .card__hint{ opacity: 1; transform: translateY(0); }
+  .card:hover .card__name{ color: var(--primary-dark); }
+}
+.card:active .card__media img{ opacity: .9; }
+
+/* Los tamaños de aquí son los de teléfono, donde la columna mide ~173px:
+   texto más contenido para que la tarjeta no crezca de alto. Desde 768px
+   suben (ver el bloque al final de esta sección). */
+.card__body{
+  padding: var(--s-3) var(--s-3) 0;
+}
+/* Cuando la tarjeta no lleva botón de pedido (las filas del Home), el
+   cuerpo cierra la caja y necesita su propio padding inferior. */
+.card > .card__body:last-child,
+.card__link:last-child .card__body{
+  padding-bottom: var(--s-3);
+}
+/* Eyebrow: categoría (y "· Temporada") en mayúsculas sobre el nombre.
+   Solo aparece en el catálogo; el Home no lo genera. */
+.card__eyebrow{
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--s-2);
+}
+.is-unavailable .card__eyebrow{ color: var(--text-muted); }
+/* Nombre: es lo primero que se lee de la tarjeta. */
+.card__name{
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* Dos líneas reservadas para que todas las tarjetas de una fila midan
+     igual aunque unos nombres sean más largos que otros. */
+  min-height: 2.5em;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  overflow-wrap: anywhere;
+  transition: color var(--dur-fast) var(--ease);
+}
+/* Precio pegado al nombre, sin hueco de por medio, y más grande que él. */
+.card__price{
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--primary-dark);
+  font-optical-sizing: auto;
+}
+/* Sufijo "MXN" junto al precio: más chico y en tono neutro. */
+.card__price-cur{
+  margin-left: .35em;
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  letter-spacing: .04em;
+  color: var(--text-muted);
+}
+.card__price--ask{ font-size: 1.125rem; }
+.card__price-note{
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+/* Botón de pedido: la acción principal del catálogo, visible en cada
+   tarjeta sin tener que abrir el detalle.
+   Estructura de la referencia: logo en círculo blanco + texto + flecha,
+   repartidos a lo ancho. El texto puede partirse en dos líneas en
+   pantallas muy estrechas sin recortarse. */
+.card__wa{
+  margin: var(--s-3);
+  height: auto;
+  min-height: 46px;
+  padding-block: var(--s-2);
+  padding-inline: var(--s-2);
+  font-size: var(--fs-xs);
+  gap: var(--s-2);
+  white-space: normal;
+  line-height: 1.2;
+  min-width: 0;
+  justify-content: space-between;
+}
+/* Logo de WhatsApp dentro de un círculo blanco, como en la referencia. */
+.card__wa-badge{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  flex: none;
+  border-radius: var(--r-full);
+  background: #fff;
+  color: #25D366;
+}
+.card__wa-badge .icon{ width: 15px; height: 15px; }
+.card__wa-text{
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+}
+/* En móvil se ve la etiqueta corta ("Solicitar"); desde 768px la larga.
+   Así el botón no crece de alto por el texto partido en la columna estrecha. */
+.card__wa-long{ display: none; }
+.card__wa .icon--arrow{ flex: none; width: 18px; height: 18px; }
+/* Anclado al fondo de la tarjeta: como la tarjeta se estira a la altura de
+   la fila del grid, esto deja los botones alineados en toda la fila. */
+.card__wa{ margin-top: auto; }
+.card.is-unavailable .card__wa{
+  background: none;
+  background-color: var(--surface-muted);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+.card.is-unavailable .card__wa-badge{ color: var(--text-muted); }
+.card.is-unavailable .card__media img{ filter: grayscale(1); opacity: .6; }
+.card.is-unavailable .card__name,
+.card.is-unavailable .card__price{ color: var(--text-muted); }
+
+/* Desde tablet hay sitio de sobra: el texto de la tarjeta crece. */
+@media (min-width: 768px){
+  .card__body{ padding: var(--s-4) var(--s-4) 0; }
+  .card > .card__body:last-child,
+  .card__link:last-child .card__body{ padding-bottom: var(--s-4); }
+  .card__name{ font-size: 1.125rem; }
+  .card__price{ font-size: 1.5rem; }
+  .card__price-cur{ font-size: var(--fs-base); }
+  .card__wa{
+    margin: var(--s-4);
+    margin-top: auto;
+    min-height: 50px;
+    padding-inline: var(--s-3);
+    font-size: var(--fs-sm);
+    gap: var(--s-2);
+  }
+  .card__wa-badge{ width: 30px; height: 30px; }
+  .card__wa-badge .icon{ width: 17px; height: 17px; }
+  .card__wa-short{ display: none; }
+  .card__wa-long{ display: inline; }
+}
+
+/* El nombre grande en tipografía display es solo del catálogo: en el Home
+   la tarjeta es más compacta y conserva su nombre en Inter.
+   Reserva dos líneas fijas para que el precio quede a la misma altura en
+   todas las tarjetas de una fila, aunque unos nombres ocupen una línea y
+   otros dos. */
+.catalog-grid .card__name{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+  min-height: 2.5em;
+  -webkit-line-clamp: 2;
+  font-optical-sizing: auto;
+}
+.catalog-grid .card__price{ font-size: 1.25rem; }
+@media (min-width: 768px){
+  .catalog-grid .card__name{ font-size: 1.625rem; letter-spacing: -.02em; }
+  .catalog-grid .card__price{ font-size: 2rem; }
+}
+
+/* ---------- Badges ---------- */
+.badge{
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 1;
+  padding: var(--s-1) var(--s-3);
+  border-radius: var(--r-full);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 10px rgba(28,18,38,.18);
+}
+.badge--sold{ background: rgba(37,28,46,.82); }
+.badge--featured{ background: rgba(122,78,171,.92); }
+
+/* ---------- Tarjeta de categoría ---------- */
+.cat-card{
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--sh-1);
+  transition: box-shadow var(--dur) var(--ease);
+}
+.cat-card img{
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out-expo);
+}
+.cat-card::after{
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(28,18,38,.72) 0%, rgba(28,18,38,.18) 45%, transparent 70%);
+  transition: opacity var(--dur) var(--ease);
+}
+.cat-card__label{
+  position: absolute;
+  left: var(--s-4); bottom: var(--s-4); right: var(--s-4);
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: #fff;
+  font-size: var(--fs-h3);
+  letter-spacing: -.01em;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+/* Flecha que asoma en hover */
+.cat-card__arrow{
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--r-full);
+  border: 1px solid rgba(255,255,255,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.cat-card__arrow .icon{ width: 16px; height: 16px; }
+@media (hover: hover) and (pointer: fine){
+  .cat-card:hover{ box-shadow: var(--sh-3); }
+  .cat-card:hover img{ transform: scale(1.07); }
+  .cat-card:hover .cat-card__arrow{ opacity: 1; transform: translateX(0); }
+}
+
+/* ---------- Chips de filtro ----------
+   El relleno morado del chip activo no se pinta en el chip: vive en
+   .chip-indicator, una píldora absoluta que motion.js reposiciona con
+   Flip.fit(). Así el cambio de filtro se desliza en vez de saltar. */
+.chip-row{
+  position: relative;
+  display: flex;
+  gap: var(--s-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: var(--s-1);
+}
+.chip-row::-webkit-scrollbar{ display: none; }
+.chip{
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  height: 42px;
+  padding-inline: var(--s-4);
+  border-radius: var(--r-full);
+  border: 1px solid var(--border-strong);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  transition: background var(--dur-fast) var(--ease), color var(--dur) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.chip[aria-pressed="true"]{
+  border-color: transparent;
+  color: #fff;
+}
+.chip:hover:not([aria-pressed="true"]){
+  border-color: var(--primary-light);
+  background: var(--primary-tint);
+}
+
+.chip-indicator{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 42px;
+  border-radius: var(--r-full);
+  background: var(--grad-primary);
+  /* Sin box-shadow: la fila de chips tiene overflow-x:auto, así que la
+     sombra de esta píldora se recortaba arriba y abajo y se asomaba
+     alrededor de los chips vecinos. */
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+}
+.chip-indicator.is-ready{ opacity: 1; }
+/* Sin JS el chip activo necesita su propio fondo. */
+.no-js-anim .chip[aria-pressed="true"]{ background: var(--primary); }
+
+/* ---------- Buscador ---------- */
+.search{
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search .icon{
+  position: absolute;
+  left: var(--s-3);
+  width: 20px; height: 20px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.search__input{
+  width: 100%;
+  height: 52px;
+  padding-inline: var(--s-7) var(--s-7);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  font-size: var(--fs-base);
+  box-shadow: var(--sh-1);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.search__input:hover{ border-color: var(--primary-light); }
+.search__input:focus{
+  border-color: var(--primary);
+  box-shadow: var(--sh-1), var(--focus);
+  outline: none;
+}
+.search__input::placeholder{ color: var(--text-muted); }
+.search__clear{
+  position: absolute;
+  right: var(--s-1);
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+}
+.search__clear[hidden]{ display: none; }
+
+/* ---------- Barra de filtros sticky ----------
+   Va a ancho completo (fuera del .container) para que al quedarse fija
+   cubra el contenido de lado a lado. Se ancla a 60px, la altura del header
+   una vez scrolleado (.header.is-scrolled), que es el único momento en que
+   esta barra llega a fijarse. */
+.filter-bar{
+  position: sticky;
+  top: 60px;
+  z-index: 90;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding-block: var(--s-3);
+}
+.filter-bar__inner{
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+@media (min-width: 768px){
+  .filter-bar__inner{
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-5);
+  }
+  .filter-bar__inner .chip-row{ flex: 1; min-width: 0; }
+}
+.filter-bar__count{
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  flex: none;
+}
+
+/* ---------- Modal de producto ---------- */
+.product-dialog{
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+}
+.product-dialog::backdrop{
+  background: var(--overlay);
+}
+.product-dialog[open]{
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.product-sheet{
+  background: var(--surface);
+  width: 100%;
+  max-height: 92dvh;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--sh-3);
+}
+/* La animación de entrada/salida la hace motion.js con GSAP (necesitamos
+   animar el cierre, y con @keyframes el <dialog> desaparece de golpe).
+   Este fallback solo aplica cuando GSAP no está disponible. */
+.no-js-anim .product-sheet{
+  animation: sheet-in var(--dur) var(--ease);
+}
+@keyframes sheet-in{
+  from{ transform: translateY(24px); opacity: 0; }
+  to{ transform: translateY(0); opacity: 1; }
+}
+.product-sheet__handle{
+  display: flex;
+  justify-content: center;
+  padding-top: var(--s-2);
+}
+.product-sheet__handle span{
+  width: 40px; height: 4px;
+  border-radius: var(--r-full);
+  background: var(--border-strong);
+}
+.product-sheet__close{
+  position: absolute;
+  top: var(--s-3); right: var(--s-3);
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.9);
+  border-radius: var(--r-full);
+  z-index: 2;
+}
+.product-sheet__scroll{
+  overflow-y: auto;
+  flex: 1;
+}
+.product-sheet__media{
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--surface-muted);
+}
+.product-sheet__media img{ width: 100%; height: 100%; object-fit: cover; }
+.product-sheet__content{
+  padding: var(--s-5);
+}
+.product-sheet__meta{
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--s-2);
+}
+.product-sheet__name{
+  font-size: var(--fs-h2);
+}
+.product-sheet__price{
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  color: var(--primary-dark);
+  margin-top: var(--s-2);
+  font-optical-sizing: auto;
+}
+.product-sheet__price-note{
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-family: var(--font-text);
+  font-weight: 400;
+}
+.product-sheet__desc{
+  margin-top: var(--s-4);
+  color: var(--text);
+}
+.product-sheet__bullets{
+  margin-top: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.product-sheet__bullets li{
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.product-sheet__bullets .icon{
+  width: 18px; height: 18px;
+  color: var(--accent-sage);
+  margin-top: 2px;
+}
+.product-sheet__unavailable{
+  margin-top: var(--s-3);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--warning);
+}
+.product-sheet__footer{
+  padding: var(--s-4) var(--s-5);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: var(--s-3);
+  background: var(--surface);
+}
+.product-sheet__footer .btn--primary{ flex: 1; }
+
+@media (min-width: 768px){
+  .product-dialog[open]{ align-items: center; }
+  .product-sheet{
+    max-width: 920px;
+    max-height: 85dvh;
+    border-radius: var(--r-xl);
+    flex-direction: row;
+  }
+  .no-js-anim .product-sheet{
+    animation: dialog-in var(--dur) var(--ease);
+  }
+  @keyframes dialog-in{
+    from{ transform: scale(.98); opacity: 0; }
+    to{ transform: scale(1); opacity: 1; }
+  }
+  .product-sheet__handle{ display: none; }
+  .product-sheet__scroll{
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    flex: 1;
+  }
+  .product-sheet__media{
+    width: 55%;
+    aspect-ratio: auto;
+  }
+  .product-sheet__content-wrap{
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .product-sheet__footer{ border-top: 1px solid var(--border); }
+}
+
+/* ---------- Botón flotante WhatsApp ---------- */
+.float-wa{
+  position: fixed;
+  right: var(--s-4);
+  bottom: var(--s-4);
+  width: 58px; height: 58px;
+  border-radius: var(--r-full);
+  background: var(--grad-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sh-primary-lg);
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px) scale(.9);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease-spring), visibility var(--dur), box-shadow var(--dur) var(--ease);
+}
+.float-wa.is-visible{
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.float-wa:hover{ box-shadow: 0 18px 44px rgba(122,78,171,.5); }
+.float-wa .icon{ width: 26px; height: 26px; }
+/* Halo que late suavemente para atraer la mirada sin ser molesto. */
+.float-wa__pulse{
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid var(--primary-light);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Estado vacío ---------- */
+.empty-state{
+  grid-column: 1 / -1;
+  text-align: center;
+  padding-block: var(--s-8);
+  color: var(--text-muted);
+}
+.empty-state .icon{
+  width: 40px; height: 40px;
+  color: var(--primary-light);
+  margin-inline: auto;
+  margin-bottom: var(--s-4);
+}
+.empty-state__title{
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  color: var(--text);
+  margin-bottom: var(--s-2);
+}
+.empty-state__text{
+  max-width: 32ch;
+  margin-inline: auto;
+  margin-bottom: var(--s-5);
+}
+
+/* ---------- Toast ---------- */
+.toast{
+  position: fixed;
+  bottom: var(--s-6);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--text);
+  color: #fff;
+  padding: var(--s-3) var(--s-5);
+  border-radius: var(--r-full);
+  font-size: var(--fs-sm);
+  box-shadow: var(--sh-2);
+  z-index: 500;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), visibility var(--dur);
+}
+.toast.is-visible{
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- noscript ---------- */
+.noscript-banner{
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  text-align: center;
+  padding: var(--s-5);
+  font-size: var(--fs-sm);
+}
+
+/* ==========================================================
+   Componentes nuevos (fase de rediseño)
+   ========================================================== */
+
+/* ---------- Marquee ----------
+   Cinta de texto en movimiento continuo. El desplazamiento lo hace GSAP
+   sobre .marquee__track; aquí solo va la presentación.
+   aria-hidden porque es decorativo y el texto se repite. */
+.marquee{
+  overflow: hidden;
+  padding-block: var(--s-4);
+  background: var(--surface-deep);
+  color: var(--text-on-dark);
+  border-block: 1px solid rgba(255,255,255,.08);
+}
+.marquee__track{
+  display: flex;
+  gap: var(--s-6);
+  width: max-content;
+  will-change: transform;
+}
+.marquee__item{
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  white-space: nowrap;
+  letter-spacing: -.01em;
+}
+.marquee__item::after{
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  flex-shrink: 0;
+}
+
+/* ---------- Banda oscura ---------- */
+.dark-band{
+  background: var(--grad-deep);
+  color: var(--text-on-dark);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.dark-band::before{
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 60vmax; height: 60vmax;
+  top: -20vmax; right: -20vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168,127,209,.3), transparent 65%);
+  pointer-events: none;
+}
+.dark-band h2,
+.dark-band h3{ color: var(--text-on-dark); }
+.dark-band .eyebrow{ color: var(--accent-light); }
+.dark-band .text-muted{ color: var(--text-on-dark-muted); }
+
+/* ---------- Tarjeta de testimonio ---------- */
+.testimonial{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--s-5);
+  box-shadow: var(--sh-1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  transition: transform var(--dur) var(--ease-out-expo), box-shadow var(--dur) var(--ease);
+}
+@media (hover: hover) and (pointer: fine){
+  .testimonial:hover{ transform: translateY(-4px); box-shadow: var(--sh-2); }
+}
+.testimonial__quote{
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  line-height: 1.5;
+  color: var(--text);
+}
+.testimonial__quote::before{
+  content: '\201C';
+  color: var(--primary-light);
+  font-size: 2.5rem;
+  line-height: 0;
+  vertical-align: -.35em;
+  margin-right: .1em;
+}
+.testimonial__author{
+  margin-top: auto;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.testimonial__stars{
+  display: flex;
+  gap: 2px;
+  color: var(--accent-gold);
+}
+.testimonial__stars .icon{ width: 16px; height: 16px; }
+
+/* ---------- Cifra destacada ---------- */
+.stat__num{
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 6vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--primary-dark);
+  font-optical-sizing: auto;
+}
+.dark-band .stat__num{ color: var(--accent-light); }
+.stat__label{
+  margin-top: var(--s-2);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* ---------- Galería horizontal con pin ----------
+   En escritorio, ScrollTrigger fija la sección y desplaza el track.
+   En móvil se degrada a scroll horizontal nativo con snap. */
+.pin-gallery{
+  position: relative;
+  overflow: hidden;
+}
+.pin-gallery__track{
+  display: flex;
+  gap: var(--s-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: var(--s-2);
+}
+.pin-gallery__track::-webkit-scrollbar{ display: none; }
+.pin-gallery__item{
+  flex: 0 0 72vw;
+  scroll-snap-align: center;
+}
+@media (min-width: 1024px){
+  /* Con pin activo el track lo mueve GSAP: se desactiva el scroll nativo. */
+  .pin-gallery.is-pinned .pin-gallery__track{
+    overflow: visible;
+    scroll-snap-type: none;
+    width: max-content;
+    gap: var(--s-5);
+  }
+  .pin-gallery.is-pinned .pin-gallery__item{ flex-basis: 340px; }
+}

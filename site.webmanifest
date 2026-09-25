@@ -1,0 +1,11 @@
+{
+  "name": "Florería Sam's",
+  "short_name": "Sam's",
+  "start_url": "/index.html",
+  "display": "browser",
+  "background_color": "#FDFCFB",
+  "theme_color": "#7A4EAB",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

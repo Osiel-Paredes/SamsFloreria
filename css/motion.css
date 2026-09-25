@@ -1,0 +1,130 @@
+/* ==========================================================
+   motion.css — capa de movimiento
+   Estados iniciales para las animaciones de GSAP, overlay de
+   transición de página y fallbacks.
+
+   REGLA IMPORTANTE:
+   Los estados "ocultos" SOLO se aplican bajo html.js-anim, que se
+   añade con un script síncrono en el <head>. Si el JS falla o está
+   bloqueado, nada queda invisible y el sitio sigue siendo legible.
+   ========================================================== */
+
+/* ---------- Estados iniciales de reveal ---------- */
+.js-anim [data-anim]{
+  opacity: 0;
+  will-change: transform, opacity;
+}
+/* La distancia sale del token --anim-shift (css/base.css). Con el valor
+   actual (0) nada se desplaza: todo entra con un fundido en su sitio. */
+.js-anim [data-anim="fade"]{ transform: none; }
+.js-anim [data-anim="fade-up"]{ transform: translate3d(0, var(--anim-shift), 0); }
+.js-anim [data-anim="fade-down"]{ transform: translate3d(0, calc(var(--anim-shift) * -1), 0); }
+.js-anim [data-anim="fade-left"]{ transform: translate3d(var(--anim-shift), 0, 0); }
+.js-anim [data-anim="fade-right"]{ transform: translate3d(calc(var(--anim-shift) * -1), 0, 0); }
+.js-anim [data-anim="scale"]{ transform: none; }
+
+/* Los hijos de un grupo entran en cascada; el contenedor no se oculta.
+   Solo fundido, sin desplazamiento: son rejillas de tarjetas y moverlas al
+   entrar hacía que la página pareciera trabarse al scrollear. */
+.js-anim [data-anim-group]{ opacity: 1; }
+.js-anim [data-anim-group] > *{
+  opacity: 0;
+  will-change: opacity;
+}
+
+/* Revelado por máscara: la imagen se descubre en lugar de aparecer. */
+.js-anim [data-anim-mask]{
+  clip-path: inset(0 0 100% 0);
+  will-change: clip-path;
+}
+
+/* El título del hero se parte en líneas con SplitText; cada línea sube
+   desde detrás de su propia máscara. */
+.split-line-mask{ overflow: hidden; display: block; }
+
+/* ---------- Indicador de scroll del hero ---------- */
+.scroll-cue{
+  position: absolute;
+  bottom: var(--s-5);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  color: rgba(255,255,255,.75);
+  font-size: var(--fs-xs);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+@media (min-width: 768px){ .scroll-cue{ display: flex; } }
+.scroll-cue__track{
+  width: 1px;
+  height: 48px;
+  background: rgba(255,255,255,.28);
+  position: relative;
+  overflow: hidden;
+}
+.scroll-cue__thumb{
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 40%;
+  background: #fff;
+}
+
+/* ---------- Overlay de transición entre páginas ---------- */
+.page-veil{
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--grad-deep);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+.page-veil.is-active{
+  visibility: visible;
+  pointer-events: all;
+}
+
+/* ---------- Línea del proceso (se dibuja al hacer scroll) ---------- */
+.process-line{
+  position: absolute;
+  /* Va del centro del primer círculo al del último (23px = mitad de los
+     46px del círculo; la columna mide (100% - 2 huecos) / 3), y a la altura
+     de su centro. Así se lee como el hilo que une los tres pasos en lugar
+     de una raya que sobresale por los lados. */
+  left: 23px;
+  right: calc((100% - var(--s-6) * 2) / 3 - 23px);
+  top: 22px;
+  height: 2px;
+  background: var(--border-strong);
+  transform-origin: left center;
+  display: none;
+}
+@media (min-width: 768px){ .process-line{ display: block; } }
+.process-line__fill{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--primary), var(--accent-light));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* ---------- Sin JS / movimiento reducido ----------
+   Si el usuario pide menos movimiento, mostramos todo en su estado
+   final de inmediato y desactivamos los preparativos de GSAP. */
+@media (prefers-reduced-motion: reduce){
+  .js-anim [data-anim],
+  .js-anim [data-anim-group] > *{
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .js-anim [data-anim-mask]{ clip-path: none !important; }
+  .scroll-cue{ display: none; }
+  .page-veil{ display: none; }
+  .process-line__fill{ transform: scaleX(1); }
+}

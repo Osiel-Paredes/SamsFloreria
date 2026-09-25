@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750" width="600" height="750" role="img" aria-labelledby="t d">
+  <title id="t">Ramo de flores de muestra</title>
+  <desc id="d">Imagen provisional. Sustituir por fotografía real del arreglo.</desc>
+  <rect width="600" height="750" fill="#F7F5F3"/>
+  <!-- envoltura -->
+  <path d="M150 560 L450 560 L410 700 L190 700 Z" fill="#EFE7DC" stroke="#D9CDBB" stroke-width="3"/>
+  <!-- tallos -->
+  <g stroke="#5A7D6B" stroke-width="6" stroke-linecap="round">
+    <line x1="300" y1="560" x2="260" y2="380"/>
+    <line x1="300" y1="560" x2="300" y2="360"/>
+    <line x1="300" y1="560" x2="340" y2="380"/>
+    <line x1="300" y1="560" x2="230" y2="410"/>
+    <line x1="300" y1="560" x2="370" y2="410"/>
+  </g>
+  <!-- hojas -->
+  <g fill="#6E9A80">
+    <ellipse cx="245" cy="470" rx="22" ry="10" transform="rotate(-35 245 470)"/>
+    <ellipse cx="360" cy="470" rx="22" ry="10" transform="rotate(35 360 470)"/>
+  </g>
+  <!-- flores -->
+  <g>
+    <g transform="translate(260,370)">
+      <circle r="34" fill="#A87FD1"/>
+      <circle r="16" fill="#7A4EAB"/>
+    </g>
+    <g transform="translate(300,340)">
+      <circle r="40" fill="#D9A3B8"/>
+      <circle r="18" fill="#B8748F"/>
+    </g>
+    <g transform="translate(345,372)">
+      <circle r="30" fill="#C9A2DE"/>
+      <circle r="14" fill="#7A4EAB"/>
+    </g>
+    <g transform="translate(225,405)">
+      <circle r="26" fill="#E8C7D6"/>
+      <circle r="12" fill="#D9A3B8"/>
+    </g>
+    <g transform="translate(378,405)">
+      <circle r="26" fill="#C9A2DE"/>
+      <circle r="12" fill="#7A4EAB"/>
+    </g>
+  </g>
+  <text x="300" y="730" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#8A8290">Foto de muestra — reemplazar</text>
+</svg>
